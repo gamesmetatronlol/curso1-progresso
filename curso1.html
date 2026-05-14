@@ -1,192 +1,367 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Progresso</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Progresso</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 20px;
-        }
+  body {
+    background: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: flex-start;
+    padding: 18px 12px 20px;
+  }
 
-        .progress-wrapper {
-            width: 100%;
-            max-width: 860px;
-        }
+  @keyframes entradaCard {
+    0%   { opacity: 0; transform: translateY(-18px) scaleX(0.94); }
+    60%  { opacity: 1; transform: translateY(3px) scaleX(1.01); }
+    100% { opacity: 1; transform: translateY(0) scaleX(1); }
+  }
 
-        .steps {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-        }
+  @keyframes entradaBarra {
+    0%   { opacity: 0; transform: scaleX(0.6); }
+    100% { opacity: 1; transform: scaleX(1); }
+  }
 
-        .track {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: #1e3a5f;
-            transform: translateY(-50%);
-            border-radius: 3px;
-            z-index: 0;
-        }
+  @keyframes entradaTexto {
+    0%   { opacity: 0; transform: translateX(-10px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
 
-        .track-fill {
-            height: 100%;
-            background: #4ecca3;
-            border-radius: 3px;
-            transition: width 0.5s ease;
-            width: 0%;
-        }
+  .card {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    animation: entradaCard 0.65s cubic-bezier(.4,0,.2,1) both;
+  }
 
-        .step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            z-index: 1;
-            cursor: default;
-        }
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    animation: entradaTexto 0.5s 0.15s cubic-bezier(.4,0,.2,1) both;
+  }
 
-        .dot {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: #1e3a5f;
-            border: 3px solid #1e3a5f;
-            transition: all 0.4s ease;
-            position: relative;
-        }
+  .titulo {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #0d2b5e;
+    text-align: center;
+    flex: 1;
+  }
 
-        .step.done .dot {
-            background: #4ecca3;
-            border-color: #4ecca3;
-            box-shadow: 0 0 10px rgba(78, 204, 163, 0.5);
-        }
+  .pct-label {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0d2b5e;
+    opacity: 0.5;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
 
-        .step.current .dot {
-            background: #facc15;
-            border-color: #facc15;
-            box-shadow: 0 0 12px rgba(250, 204, 21, 0.6);
-        }
+  .trilha-wrap {
+    width: 100%;
+    position: relative;
+    padding-bottom: 20px;
+    animation: entradaBarra 0.55s 0.25s cubic-bezier(.4,0,.2,1) both;
+  }
 
-        .label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #94a3b8;
-            text-align: center;
-            white-space: nowrap;
-            transition: color 0.4s ease;
-        }
+  .trilha {
+    width: 100%;
+    height: 8px;
+    background: #e8edf5;
+    border-radius: 99px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(13,43,94,0.10), inset 0 1px 3px rgba(0,0,0,0.08);
+  }
 
-        .step.done .label  { color: #4ecca3; }
-        .step.current .label { color: #facc15; }
-    </style>
+  .trilha::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 99px;
+    border: 1.5px solid rgba(13,43,94,0.10);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .preenchimento {
+    height: 100%;
+    width: 0%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #1a4a8a, #f5c400);
+    transition: width 0.9s cubic-bezier(.4,0,.2,1);
+    position: relative;
+    box-shadow: 0 2px 10px rgba(245,196,0,0.35);
+  }
+
+  .preenchimento::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60px;
+    width: 40px; height: 100%;
+    background: rgba(255,255,255,0.4);
+    transform: skewX(-20deg);
+    animation: brilho 2.8s infinite;
+  }
+
+  @keyframes brilho {
+    0%   { left: -60px; opacity: 0; }
+    30%  { opacity: 1; }
+    100% { left: 110%; opacity: 0; }
+  }
+
+  .etapas-wrap {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    animation: entradaTexto 0.5s 0.35s cubic-bezier(.4,0,.2,1) both;
+  }
+
+  .etapa-dot {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    transform: translateX(-50%);
+    cursor: default;
+  }
+
+  .dot-circulo {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #dce4f0;
+    transition: background 0.4s, transform 0.3s, box-shadow 0.3s;
+  }
+
+  .etapa-dot.peso-duplo .dot-circulo {
+    width: 11px;
+    height: 11px;
+    border: 2px solid #c8d4e8;
+  }
+
+  .etapa-dot.feita .dot-circulo {
+    background: #f5c400;
+    transform: scale(1.3);
+    box-shadow: 0 0 6px rgba(245,196,0,0.55);
+  }
+
+  .etapa-dot.peso-duplo.feita .dot-circulo {
+    box-shadow: 0 0 10px rgba(245,196,0,0.75);
+  }
+
+  .dot-check {
+    font-size: 0.52rem;
+    color: #0d2b5e;
+    font-weight: 800;
+    opacity: 0;
+    transition: opacity 0.3s;
+    line-height: 1;
+  }
+
+  .etapa-dot.feita .dot-check { opacity: 1; }
+
+  .status {
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #8a9bb5;
+    text-align: center;
+    width: 100%;
+    min-height: 14px;
+    transition: color 0.4s;
+    letter-spacing: 0.02em;
+    animation: entradaTexto 0.5s 0.45s cubic-bezier(.4,0,.2,1) both;
+  }
+
+  .status.completo {
+    color: #1a6e2e;
+    font-weight: 700;
+  }
+
+  .btn-certificado {
+    display: none;
+    width: 100%;
+    padding: 11px 0;
+    background: linear-gradient(135deg, #0d2b5e, #1a4a8a);
+    color: #f5c400;
+    border: none;
+    border-radius: 7px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(13,43,94,0.18);
+    transition: transform 0.15s, box-shadow 0.15s;
+    animation: surgir 0.6s cubic-bezier(.4,0,.2,1);
+  }
+
+  .btn-certificado:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 16px rgba(13,43,94,0.28);
+  }
+
+  @keyframes surgir {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
 </head>
 <body>
-<div class="progress-wrapper">
-    <div class="steps" id="steps">
-        <div class="track"><div class="track-fill" id="trackFill"></div></div>
+
+<div class="card">
+  <div class="header">
+    <span class="titulo">⚡ Seu progresso</span>
+    <span class="pct-label" id="pct-label">0%</span>
+  </div>
+
+  <div class="trilha-wrap">
+    <div class="trilha">
+      <div class="preenchimento" id="barra"></div>
     </div>
+    <div class="etapas-wrap" id="dots"></div>
+  </div>
+
+  <div class="status" id="status">Continue avançando para completar o curso!</div>
+
+  <a class="btn-certificado" id="btn-cert" href="#" target="_blank">
+    🎓 Emitir Certificado
+  </a>
 </div>
 
 <script>
-    // ─── CONFIGURAÇÃO ───────────────────────────────────────────
-    const ETAPAS = [
-        { chave: 'c1a1', label: 'Aula 1' },
-        { chave: 'c1a2', label: 'Aula 2' },
-        { chave: 'c1a3', label: 'Aula 3' },
-        { chave: 'c1e1', label: 'Exercício' }
-    ];
+  // ─── CONFIGURAÇÃO ────────────────────────────────────────────
+  const ETAPAS = [
+    { chave: 'c1a1', peso: 1 },
+    { chave: 'c1e1', peso: 1 },
+    { chave: 'c1a2', peso: 1 },
+    { chave: 'c1e2', peso: 1 },
+    { chave: 'c1e3', peso: 1 },
+    { chave: 'c1a3', peso: 1 },
+    { chave: 'c1e4', peso: 2 },
+  ];
 
-    const CHAVE_STORAGE  = 'progresso_curso';
-    const CHAVE_EXPIRY   = 'progresso_curso_expiry';
-    const HORAS_EXPIRY   = 24; // apaga após 24h — troque se quiser mais ou menos
-    // ────────────────────────────────────────────────────────────
+  const TOTAL_PONTOS     = ETAPAS.reduce((acc, e) => acc + e.peso, 0);
+  const URL_CERTIFICADO  = 'COLE_AQUI_O_LINK_DA_PAGINA_DE_CERTIFICADO';
+  const CHAVE_EXPIRY     = 'progresso_expiry';
+  const HORAS_EXPIRY     = 24; // apaga após 24h — troque se quiser
+  // ─────────────────────────────────────────────────────────────
 
-    function expirou() {
-        const expiry = localStorage.getItem(CHAVE_EXPIRY);
-        if (!expiry) return false;
-        return Date.now() > parseInt(expiry);
-    }
+  function limparSeExpirou() {
+    try {
+      const expiry = localStorage.getItem(CHAVE_EXPIRY);
+      if (expiry && Date.now() > parseInt(expiry)) {
+        ETAPAS.forEach(e => localStorage.removeItem('progresso_' + e.chave));
+        localStorage.removeItem(CHAVE_EXPIRY);
+      }
+    } catch(err) {}
+  }
 
-    function limparSeExpirou() {
-        if (expirou()) {
-            localStorage.removeItem(CHAVE_STORAGE);
-            localStorage.removeItem(CHAVE_EXPIRY);
-        }
-    }
+  function marcarExpiry() {
+    try {
+      if (!localStorage.getItem(CHAVE_EXPIRY)) {
+        const expiry = Date.now() + HORAS_EXPIRY * 60 * 60 * 1000;
+        localStorage.setItem(CHAVE_EXPIRY, expiry.toString());
+      }
+    } catch(err) {}
+  }
 
-    function carregarProgresso() {
-        limparSeExpirou();
-        const salvo = localStorage.getItem(CHAVE_STORAGE);
-        return salvo ? JSON.parse(salvo) : {};
-    }
+  function lerStorage(chave) {
+    try { return localStorage.getItem('progresso_' + chave) === 'concluida'; }
+    catch(e) { return false; }
+  }
 
-    function salvarProgresso(progresso) {
-        localStorage.setItem(CHAVE_STORAGE, JSON.stringify(progresso));
-        // só define o tempo de expiração na primeira vez que salva
-        if (!localStorage.getItem(CHAVE_EXPIRY)) {
-            const expiry = Date.now() + HORAS_EXPIRY * 60 * 60 * 1000;
-            localStorage.setItem(CHAVE_EXPIRY, expiry.toString());
-        }
-    }
+  // Monta os dots
+  const dotsWrap = document.getElementById('dots');
+  ETAPAS.forEach((etapa, i) => {
+    const posicao = ETAPAS.length === 1 ? 50 : (i / (ETAPAS.length - 1)) * 100;
 
-    function renderizar(progresso) {
-        const container = document.getElementById('steps');
-        const trackFill = document.getElementById('trackFill');
+    const wrap = document.createElement('div');
+    wrap.className = 'etapa-dot' + (etapa.peso > 1 ? ' peso-duplo' : '');
+    wrap.id = 'dot-' + i;
+    wrap.style.left = posicao + '%';
 
-        container.querySelectorAll('.step').forEach(el => el.remove());
+    const circulo = document.createElement('div');
+    circulo.className = 'dot-circulo';
 
-        let ultimaConcluida = -1;
-        ETAPAS.forEach((etapa, i) => {
-            if (progresso[etapa.chave]) ultimaConcluida = i;
-        });
+    const check = document.createElement('span');
+    check.className = 'dot-check';
+    check.textContent = etapa.peso > 1 ? '★' : '✓';
 
-        const currentIndex = Math.min(ultimaConcluida + 1, ETAPAS.length - 1);
-        const percentual = ETAPAS.length <= 1 ? 0 : (ultimaConcluida / (ETAPAS.length - 1)) * 100;
-        trackFill.style.width = percentual + '%';
+    wrap.appendChild(circulo);
+    wrap.appendChild(check);
+    dotsWrap.appendChild(wrap);
+  });
 
-        ETAPAS.forEach((etapa, i) => {
-            const step = document.createElement('div');
-            step.className = 'step';
+  function atualizar() {
+    limparSeExpirou();
 
-            if (progresso[etapa.chave]) {
-                step.classList.add('done');
-            } else if (i === currentIndex && ultimaConcluida < ETAPAS.length - 1) {
-                step.classList.add('current');
-            }
+    let pontosFeitos = 0;
 
-            step.innerHTML = `
-                <div class="dot"></div>
-                <span class="label">${etapa.label}</span>
-            `;
-            container.appendChild(step);
-        });
-    }
-
-    // Recebe mensagens das páginas de aula
-    window.addEventListener('message', (event) => {
-        const data = event.data;
-        if (data && data.type === 'ETAPA_CONCLUIDA' && data.chave) {
-            const progresso = carregarProgresso();
-            progresso[data.chave] = true;
-            salvarProgresso(progresso);
-            renderizar(progresso);
-        }
+    ETAPAS.forEach((etapa, i) => {
+      const ok  = lerStorage(etapa.chave);
+      const dot = document.getElementById('dot-' + i);
+      if (ok) {
+        pontosFeitos += etapa.peso;
+        dot.classList.add('feita');
+      } else {
+        dot.classList.remove('feita');
+      }
     });
 
-    // Inicializa
-    renderizar(carregarProgresso());
+    const pct = Math.round((pontosFeitos / TOTAL_PONTOS) * 100);
+    document.getElementById('barra').style.width = pct + '%';
+    document.getElementById('pct-label').textContent = pct + '%';
+
+    const status = document.getElementById('status');
+    const btn    = document.getElementById('btn-cert');
+
+    if (pontosFeitos === TOTAL_PONTOS) {
+      status.textContent = '🎉 Curso concluído! Parabéns!';
+      status.classList.add('completo');
+      btn.style.display = 'block';
+      btn.href = URL_CERTIFICADO;
+    } else {
+      status.classList.remove('completo');
+      btn.style.display = 'none';
+      status.textContent = pct + '% concluído — continue avançando!';
+    }
+  }
+
+  // Recebe conclusão das aulas
+  window.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'ETAPA_CONCLUIDA') {
+      try {
+        localStorage.setItem('progresso_' + e.data.chave, 'concluida');
+        marcarExpiry();
+      } catch(err) {}
+      atualizar();
+    }
+  });
+
+  window.addEventListener('storage', function(e) {
+    if (e.key && e.key.startsWith('progresso_')) atualizar();
+  });
+
+  setInterval(atualizar, 1500);
+
+  atualizar();
 </script>
 </body>
 </html>
