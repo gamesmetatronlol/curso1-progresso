@@ -65,12 +65,13 @@
     color: #0d2b5e;
     opacity: 0.5;
     letter-spacing: 0.05em;
+    text-align: center;
   }
 
   .trilha-wrap {
     width: 100%;
     position: relative;
-    padding-bottom: 24px;
+    padding-bottom: 20px;
     animation: entradaBarra 0.55s 0.25s cubic-bezier(.4,0,.2,1) both;
   }
 
@@ -120,12 +121,13 @@
     100% { left: 110%; opacity: 0; }
   }
 
-  /* dots ficam ABAIXO da trilha usando position relative normal */
   .etapas-wrap {
-    position: relative;
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
     height: 20px;
-    margin-top: 4px;
+    animation: entradaTexto 0.5s 0.35s cubic-bezier(.4,0,.2,1) both;
   }
 
   .etapa-dot {
@@ -133,8 +135,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    /* left é definido via JS após render */
+    gap: 1px;
     transform: translateX(-50%);
     cursor: default;
   }
@@ -175,7 +176,7 @@
   .etapa-dot.feita .dot-check { opacity: 1; }
 
   .status {
-    font-size: 1rem;
+    font-size: 1.08rem;
     font-weight: 600;
     color: #8a9bb5;
     text-align: center;
@@ -199,7 +200,7 @@
     color: #f5c400;
     border: none;
     border-radius: 7px;
-    font-size: 1.05rem;
+    font-size: 1.15rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -234,9 +235,8 @@
     <div class="trilha">
       <div class="preenchimento" id="barra"></div>
     </div>
+    <div class="etapas-wrap" id="dots"></div>
   </div>
-
-  <div class="etapas-wrap" id="dots"></div>
 
   <div class="status" id="status">Continue avançando para completar o curso!</div>
 
@@ -284,13 +284,15 @@
     catch(e) { return false; }
   }
 
-  // Monta os dots — posição em % calculada DEPOIS do render
+  // Monta os dots
   const dotsWrap = document.getElementById('dots');
-
   ETAPAS.forEach((etapa, i) => {
+    const posicao = ETAPAS.length === 1 ? 50 : (i / (ETAPAS.length - 1)) * 100;
+
     const wrap = document.createElement('div');
     wrap.className = 'etapa-dot' + (etapa.peso > 1 ? ' peso-duplo' : '');
     wrap.id = 'dot-' + i;
+    wrap.style.left = posicao + '%';
 
     const circulo = document.createElement('div');
     circulo.className = 'dot-circulo';
@@ -304,17 +306,6 @@
     dotsWrap.appendChild(wrap);
   });
 
-  // Posiciona os dots usando a largura real do container
-  function posicionarDots() {
-    const largura = dotsWrap.offsetWidth;
-    ETAPAS.forEach((etapa, i) => {
-      const pct = ETAPAS.length === 1 ? 0.5 : i / (ETAPAS.length - 1);
-      const px  = pct * largura;
-      const dot = document.getElementById('dot-' + i);
-      dot.style.left = px + 'px';
-    });
-  }
-
   function atualizar() {
     limparSeExpirou();
     let pontosFeitos = 0;
@@ -322,13 +313,17 @@
     ETAPAS.forEach((etapa, i) => {
       const ok  = lerStorage(etapa.chave);
       const dot = document.getElementById('dot-' + i);
-      if (ok) { pontosFeitos += etapa.peso; dot.classList.add('feita'); }
-      else    { dot.classList.remove('feita'); }
+      if (ok) {
+        pontosFeitos += etapa.peso;
+        dot.classList.add('feita');
+      } else {
+        dot.classList.remove('feita');
+      }
     });
 
     const pct = Math.round((pontosFeitos / TOTAL_PONTOS) * 100);
-    document.getElementById('barra').style.width      = pct + '%';
-    document.getElementById('pct-label').textContent  = pct + '%';
+    document.getElementById('barra').style.width     = pct + '%';
+    document.getElementById('pct-label').textContent = pct + '%';
 
     const status = document.getElementById('status');
     const btn    = document.getElementById('btn-cert');
@@ -359,17 +354,9 @@
     if (e.key && e.key.startsWith('progresso_')) atualizar();
   });
 
-  window.addEventListener('resize', posicionarDots);
-
-  // Aguarda o DOM renderizar completamente antes de posicionar
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      posicionarDots();
-      atualizar();
-    });
-  });
-
   setInterval(atualizar, 1500);
+
+  atualizar();
 </script>
 </body>
 </html>
