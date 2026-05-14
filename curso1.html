@@ -88,7 +88,7 @@
             transition: color 0.4s ease;
         }
 
-        .step.done .label { color: #4ecca3; }
+        .step.done .label  { color: #4ecca3; }
         .step.current .label { color: #facc15; }
     </style>
 </head>
@@ -107,15 +107,38 @@
         { chave: 'c1a3', label: 'Aula 3' },
         { chave: 'c1e1', label: 'Exercício' }
     ];
+
+    const CHAVE_STORAGE  = 'progresso_curso';
+    const CHAVE_EXPIRY   = 'progresso_curso_expiry';
+    const HORAS_EXPIRY   = 24; // apaga após 24h — troque se quiser mais ou menos
     // ────────────────────────────────────────────────────────────
 
+    function expirou() {
+        const expiry = localStorage.getItem(CHAVE_EXPIRY);
+        if (!expiry) return false;
+        return Date.now() > parseInt(expiry);
+    }
+
+    function limparSeExpirou() {
+        if (expirou()) {
+            localStorage.removeItem(CHAVE_STORAGE);
+            localStorage.removeItem(CHAVE_EXPIRY);
+        }
+    }
+
     function carregarProgresso() {
-        const salvo = sessionStorage.getItem('progresso_curso');
+        limparSeExpirou();
+        const salvo = localStorage.getItem(CHAVE_STORAGE);
         return salvo ? JSON.parse(salvo) : {};
     }
 
     function salvarProgresso(progresso) {
-        sessionStorage.setItem('progresso_curso', JSON.stringify(progresso));
+        localStorage.setItem(CHAVE_STORAGE, JSON.stringify(progresso));
+        // só define o tempo de expiração na primeira vez que salva
+        if (!localStorage.getItem(CHAVE_EXPIRY)) {
+            const expiry = Date.now() + HORAS_EXPIRY * 60 * 60 * 1000;
+            localStorage.setItem(CHAVE_EXPIRY, expiry.toString());
+        }
     }
 
     function renderizar(progresso) {
